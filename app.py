@@ -1,99 +1,114 @@
-from flask import Flask, request, jsonify
-from datetime import datetime
+from flask import Flask, Response
 
 app = Flask(__name__)
-logs = []
 
-HTML = """
-<!DOCTYPE html>
-<html>
+PAGINA = """<!DOCTYPE html>
+<html lang="es">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COBRAHSR CONSOLE</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consola HTML en vivo</title>
 <style>
-body{margin:0;background:#010409;color:white;font-family:monospace;display:flex;flex-direction:column;height:100vh}
-.header{background:#161b22;padding:12px;color:#ffd700;font-weight:bold;text-align:center;border-bottom:1px solid #333}
-.menu{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:#0e1525}
-.menu button{flex:1 0 30%;background:#161b22;border:1px solid #ffd700;color:#ffd700;padding:12px;font-weight:bold;border-radius:6px;cursor:pointer}
-.menu button:hover{background:#ffd700;color:black}
-.box{padding:15px}
-input{width:100%;padding:12px;margin:6px 0;background:#010409;border:1px solid #333;color:#00ff88;border-radius:6px;outline:none}
-.btn-run{width:100%;background:#ffd700;color:black;border:none;padding:14px;font-weight:bold;border-radius:6px;margin-top:8px;cursor:pointer}
-.log{background:#0e1525;border-top:2px solid #ffd700;padding:10px;flex:1;overflow:auto}
-.log-entry{border-bottom:1px solid #222;padding:6px 0;font-size:13px;color:#8b949e}
-.log-entry b{color:#00ff88}
-#formArea{display:none}
-@media(min-width:768px){.main{display:flex;flex-direction:row;height:70vh}.left{width:50%}.right{width:50%;border-left:2px solid #ffd700}}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #0f1117; color: #e6e6e6;
+    font-family: system-ui, sans-serif; }
+  header { display: flex; gap: 8px; align-items: center; padding: 8px 12px;
+    background: #181b24; border-bottom: 1px solid #2a2f3d; }
+  header h1 { font-size: 15px; flex: 1; }
+  button { background: #2f6df6; color: #fff; border: 0; border-radius: 6px;
+    padding: 7px 12px; font-size: 13px; cursor: pointer; }
+  button.sec { background: #2a2f3d; }
+  main { display: flex; height: calc(100% - 49px); }
+  .panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .panel + .panel { border-left: 1px solid #2a2f3d; }
+  .titulo { font-size: 12px; padding: 6px 12px; background: #131620; color: #8a93a8; }
+  textarea { flex: 1; width: 100%; resize: none; border: 0; outline: none;
+    background: #0f1117; color: #d7e3ff; padding: 12px;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px;
+    line-height: 1.5; tab-size: 2; }
+  iframe { flex: 1; width: 100%; border: 0; background: #fff; }
+  @media (max-width: 700px) {
+    main { flex-direction: column; }
+    .panel + .panel { border-left: 0; border-top: 1px solid #2a2f3d; }
+  }
 </style>
 </head>
 <body>
-<div class="header">COBRAHSR CONSOLE - MENU COBRA</div>
-<div class="main">
-<div class="left">
-<div class="menu">
-<button onclick="openForm('1 - LOGIN COBRA')">1=LOGIN COBRA</button>
-<button onclick="openForm('2 - REGISTRO COBRA')">2=REGISTRO</button>
-<button onclick="openForm('3 - LINE COBRA')">3=LINE COBRA</button>
-<button onclick="openForm('4 - TIKTOK COBRA')">4=TIKTOK COBRA</button>
-<button onclick="openForm('5 - MAIL COBRA')">5=MAIL COBRA</button>
-<button onclick="salir()">6=SALIR</button>
+<header>
+  <h1>Consola HTML en vivo</h1>
+  <button onclick="ejecutar()">▶ Ejecutar</button>
+  <button class="sec" onclick="ejemplo()">Ejemplo auto</button>
+  <button class="sec" onclick="limpiar()">Limpiar</button>
+</header>
+<main>
+  <section class="panel">
+    <div class="titulo">CÓDIGO (HTML + CSS + JS)</div>
+    <textarea id="codigo" spellcheck="false">
+<style>
+  body { margin: 0; background: #87ceeb; overflow: hidden; height: 100vh; }
+  .calle { position: absolute; bottom: 0; width: 100%; height: 30%;
+    background: #333; border-top: 6px solid #666; }
+  .linea { position: absolute; bottom: 14%; width: 200%; height: 6px;
+    background: repeating-linear-gradient(90deg,#fff 0 60px,transparent 60px 120px);
+    animation: calle 1s linear infinite; }
+  .auto { position: absolute; bottom: 25%; left: -200px; width: 160px; height: 60px;
+    animation: avanzar 6s linear infinite; }
+  .cuerpo { position: absolute; bottom: 14px; width: 160px; height: 34px;
+    background: #e53935; border-radius: 10px; }
+  .techo { position: absolute; bottom: 44px; left: 35px; width: 80px; height: 28px;
+    background: #c62828; border-radius: 14px 14px 0 0; }
+  .rueda { position: absolute; bottom: 0; width: 30px; height: 30px;
+    background: #111; border-radius: 50%; border: 5px solid #bbb;
+    animation: girar 0.5s linear infinite; }
+  .rueda::after { content: ""; position: absolute; top: 0; left: 50%;
+    width: 4px; height: 100%; background: #bbb; }
+  .r1 { left: 18px; } .r2 { right: 18px; }
+  @keyframes avanzar { to { left: 110%; } }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  @keyframes calle { to { transform: translateX(-120px); } }
+</style>
+
+<div class="calle"><div class="linea"></div></div>
+<div class="auto">
+  <div class="techo"></div>
+  <div class="cuerpo"></div>
+  <div class="rueda r1"></div>
+  <div class="rueda r2"></div>
 </div>
-<div class="box" id="formArea">
-<h3 id="formTitle" style="color:#ffd700"></h3>
-<input id="user" placeholder="Usuario / Email">
-<input id="pass" type="password" placeholder="Contraseña">
-<button class="btn-run" onclick="enviar()">▶ ENTRAR</button>
-</div>
-</div>
-<div class="right log" id="log">
-<div style="color:#ffd700;font-weight:bold">▼ INTERACTUANDO EN VIVO ▼</div>
-<div id="logs"></div>
-</div>
-</div>
+</textarea>
+  </section>
+  <section class="panel">
+    <div class="titulo">RESULTADO</div>
+    <iframe id="vista" sandbox="allow-scripts"></iframe>
+  </section>
+</main>
 <script>
-let moduloActual = "";
-function openForm(mod){
-  moduloActual = mod;
-  document.getElementById('formArea').style.display='block';
-  document.getElementById('formTitle').innerText = mod + ' - INICIAR SESION';
-  addLog('Usuario abrio ' + mod);
-}
-function salir(){
-  document.getElementById('formArea').style.display='none';
-  addLog('Usuario selecciono SALIR');
-}
-async function enviar(){
-  let u = document.getElementById('user').value;
-  let p = document.getElementById('pass').value;
-  if(!u||!p){alert('Llena usuario y contraseña');return}
-  let res = await fetch('/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({modulo: moduloActual, user: u, pass: p})});
-  let data = await res.json();
-  document.getElementById('logs').innerHTML = data.html;
-  document.getElementById('user').value='';
-  document.getElementById('pass').value='';
-}
-function addLog(txt){
-  fetch('/log', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({txt})});
-}
-setInterval(async ()=>{
-  let r = await fetch('/getlogs');
-  let d = await r.json();
-  document.getElementById('logs').innerHTML = d.html;
-}, 2000);
+  const codigo = document.getElementById("codigo");
+  const vista = document.getElementById("vista");
+  let t;
+
+  function ejecutar() { vista.srcdoc = codigo.value; }
+  function limpiar() { codigo.value = ""; ejecutar(); }
+  function ejemplo() { location.reload(); }
+
+  codigo.addEventListener("input", function () {
+    clearTimeout(t);
+    t = setTimeout(ejecutar, 400);
+  });
+
+  codigo.addEventListener("keydown", function (e) {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const s = codigo.selectionStart;
+      codigo.setRangeText("  ", s, codigo.selectionEnd, "end");
+    }
+  });
+
+  ejecutar();
 </script>
 </body>
 </html>
 """
 
-@app.route('/')
-def home():
-    return HTML
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.json
-    hora = datetime.now().strftime("%H:%M:%S")
-    entry = f"[{hora}] {data['modulo']} -> Usuario: {data['user']} | Contraseña: {data['pass']}"
-    logs.append(entry)
-    if len(logs) > 50: logs.pop(0)
-    html = "".join([f"<div class='log-entry'><b>{
+@app.route("/")
+de
