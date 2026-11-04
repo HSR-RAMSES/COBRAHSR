@@ -111,4 +111,8 @@ PAGINA = """<!DOCTYPE html>
 """
 
 @app.route("/")
-de
+def inicio():
+    return Response(PAGINA, mimetype="text/html")
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
