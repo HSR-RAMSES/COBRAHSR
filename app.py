@@ -9,7 +9,7 @@ PAGINA = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SKY WEEB</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; color: #ece4ff; font-family: system-ui, sans-serif; }
   body { display: flex; flex-direction: column;
     background: linear-gradient(135deg, #0a0520, #1a0b3d 55%, #07173a); }
@@ -59,6 +59,15 @@ PAGINA = """<!DOCTYPE html>
     border-bottom: 1px solid #33276b; }
   .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .info small { color: #a999d6; font-size: 11px; }
+  /* TECLADO DE SIMBOLOS ABAJO */
+  .teclado { display: flex; gap: 6px; overflow-x: auto; padding: 8px 10px;
+    background: #120834; border-top: 1px solid #3b2a73;
+    scrollbar-width: thin; }
+  .teclado button { flex: 0 0 auto; background: #2a2350; border: 1px solid #4a3590;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 16px;
+    font-weight: bold; padding: 10px 14px; min-width: 44px; }
+  .teclado button:active { background: #8b3dff; }
+  .teclado button.etiqueta { background: #1a0f3a; color: #c4b5fd; font-size: 12px; }
   @media (max-width: 700px) {
     main { flex-direction: column; }
     .panel + .panel { border-left: 0; border-top: 1px solid #3b2a73; }
@@ -122,6 +131,44 @@ PAGINA = """<!DOCTYPE html>
   </section>
 </main>
 
+<!-- BARRA DE SIMBOLOS -->
+<div class="teclado" id="teclado">
+  <button onclick="insertar('{')">{</button>
+  <button onclick="insertar('}')">}</button>
+  <button onclick="insertar('[')">[</button>
+  <button onclick="insertar(']')">]</button>
+  <button onclick="insertar('(')">(</button>
+  <button onclick="insertar(')')">)</button>
+  <button onclick="insertar('<')">&lt;</button>
+  <button onclick="insertar('>')">&gt;</button>
+  <button onclick="insertar('/')">/</button>
+  <button onclick="insertar('\\\\')">\\</button>
+  <button onclick="insertar('&quot;')">"</button>
+  <button onclick="insertar(&quot;'&quot;)">'</button>
+  <button onclick="insertar('`')">`</button>
+  <button onclick="insertar(';')">;</button>
+  <button onclick="insertar(':')">:</button>
+  <button onclick="insertar('=')">=</button>
+  <button onclick="insertar('+')">+</button>
+  <button onclick="insertar('-')">-</button>
+  <button onclick="insertar('*')">*</button>
+  <button onclick="insertar('%')">%</button>
+  <button onclick="insertar('&')">&amp;</button>
+  <button onclick="insertar('|')">|</button>
+  <button onclick="insertar('!')">!</button>
+  <button onclick="insertar('?')">?</button>
+  <button onclick="insertar('_')">_</button>
+  <button onclick="insertar('#')">#</button>
+  <button onclick="insertar('@')">@</button>
+  <button onclick="insertar('$')">$</button>
+  <button onclick="insertar('{}')">{ }</button>
+  <button onclick="insertar('()')">( )</button>
+  <button onclick="insertar('[]')">[ ]</button>
+  <button class="etiqueta" onclick="insertar('<div></div>')">&lt;div&gt;</button>
+  <button class="etiqueta" onclick="insertar('<style></style>')">&lt;style&gt;</button>
+  <button class="etiqueta" onclick="insertar('<script></script>')">&lt;script&gt;</button>
+</div>
+
 <div class="modal" id="mGuardar">
   <div class="caja">
     <h2>Guardar creación</h2>
@@ -156,6 +203,15 @@ PAGINA = """<!DOCTYPE html>
   function limpiar() { codigo.value = ""; ejecutar(); }
   function ejemplo() { codigo.value = base; ejecutar(); }
   function cerrar(id) { document.getElementById(id).classList.remove("on"); }
+
+  // INSERTA EL SIMBOLO DONDE ESTA EL CURSOR
+  function insertar(txt) {
+    const s = codigo.selectionStart;
+    const e = codigo.selectionEnd;
+    codigo.setRangeText(txt, s, e, "end");
+    codigo.focus();
+    ejecutar();
+  }
 
   function leer() {
     try { return JSON.parse(localStorage.getItem("sw_lista") || "[]"); }
