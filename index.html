@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKY WEEB</title>
+<style>
+ *{box-sizing:border-box;margin:0;padding:0}
+ html,body{height:100%;color:#ece4ff;font-family:system-ui,sans-serif}
+ body{display:flex;flex-direction:column;background:linear-gradient(135deg,#0a0520,#1a0b3d 55%,#07173a)}
+ header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px;background:rgba(20,8,50,.85);border-bottom:1px solid #3b2a73}
+ .logo{flex:1;min-width:150px;font-size:26px;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#a855f7,#6d5cff 50%,#38a3ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+ .botones{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{background:#2f6df6;color:#fff;border:0;border-radius:6px;padding:8px 12px;font-size:13px;cursor:pointer}
+ button.gd{background:#8b3dff} button.sec{background:#2a2350} button.wa{background:#25D366;color:#fff;font-weight:bold}
+ main{flex:1;min-height:0;display:flex}
+ .panel{flex:1;display:flex;flex-direction:column;min-width:0}
+ .panel+.panel{border-left:1px solid #3b2a73}
+ .titulo{font-size:12px;padding:6px 12px;background:rgba(15,6,40,.9);color:#a999d6}
+ .area{position:relative;flex:1;display:flex;min-height:0;background:rgba(38,10,84,.55)}
+ textarea{position:relative;z-index:1;flex:1;width:100%;resize:none;border:0;outline:none;background:transparent;color:#efe6ff;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.5}
+ iframe{flex:1;width:100%;border:0;background:#fff}
+ .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+ .modal.on{display:flex}
+ .caja{background:#1a0f3a;border:1px solid #5b3fb5;border-radius:12px;padding:16px;width:100%;max-width:420px;max-height:80vh;overflow:auto}
+ .caja h2{font-size:17px;margin-bottom:10px}
+ .caja label{font-size:13px;color:#b8a8e6}
+ input{width:100%;padding:10px;margin:4px 0 12px;border-radius:8px;border:1px solid #5b3fb5;background:#0f0826;color:#fff;font-size:15px}
+ .acciones{display:flex;gap:8px;justify-content:flex-end}
+ .fila{display:flex;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid #33276b}
+ .info{flex:1;min-width:0;display:flex;flex-direction:column}
+ .info small{color:#a999d6;font-size:11px}
+ .separador{margin:14px 0 6px;font-size:13px;color:#c4b5fd;font-weight:bold;border-top:1px solid #33276b;padding-top:10px}
+ .teclado{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#120834;border-top:1px solid #3b2a73}
+ .teclado button{flex:0 0 auto;background:#2a2350;border:1px solid #4a3590;font-family:monospace;font-size:16px;font-weight:bold;padding:10px 14px;min-width:44px}
+ @media(max-width:700px){main{flex-direction:column}.panel+.panel{border-left:0;border-top:1px solid #3b2a73}}
+</style>
+</head>
+<body>
+<header>
+ <h1 class="logo">SKY WEEB</h1>
+ <div class="botones">
+  <button onclick="ejecutar()">▶ Ejecutar</button>
+  <button class="gd" onclick="abrirGuardar()">💾 Guardar</button>
+  <button class="sec" onclick="abrirLista()">📁 Mis creaciones</button>
+  <button class="sec" onclick="ejemplo()">Ejemplo auto</button>
+  <button class="sec" onclick="limpiar()">Limpiar</button>
+  <a href="https://wa.me/TU_NUMERO?text=Hola%20Ramses%2C%20me%20puedes%20pasar%20la%20contrase%C3%B1a%20para%20ver%20tu%20creaci%C3%B3n%20en%20SKY%20WEEB%3F" target="_blank"><button class="wa">💬 Pedir contraseña</button></a>
+  <span id="yo" style="font-size:12px;color:#c4b5fd"></span>
+ </div>
+</header>
+<main>
+ <section class="panel"><div class="titulo">CÓDIGO</div><div class="area"><textarea id="codigo" spellcheck="false"><h1 style="color:white">Hola SKY WEEB</h1></textarea></div></section>
+ <section class="panel"><div class="titulo">RESULTADO</div><iframe id="vista" sandbox="allow-scripts allow-popups allow-top-navigation allow-same-origin"></iframe></section>
+</main>
+<div class="teclado">
+ <button onclick="insertar('{')">{</button><button onclick="insertar('}')">}</button><button onclick="insertar('<')">&lt;</button><button onclick="insertar('>')">&gt;</button><button onclick="insertar('/')">/</button><button onclick="insertar('&quot;')">"</button><button onclick="insertar('=')">=</button><button onclick="insertar(';')">;</button>
+</div>
+<div class="modal on" id="mRegistro"><div class="caja">
+ <h2>👋 Bienvenido a SKY WEEB</h2><p style="font-size:13px;color:#b8a8e6;margin-bottom:12px">Regístrate para guardar y ver creaciones. Solo nombre y teléfono.</p>
+ <label>Tu nombre</label><input id="regNombre" placeholder="Ej. Ramses">
+ <label>Tu número de teléfono</label><input id="regTel" placeholder="Ej. 3312345678" inputmode="numeric">
+ <div class="acciones"><button class="gd" onclick="registrar()">Entrar</button></div>
+</div></div>
+<div class="modal" id="mGuardar"><div class="caja">
+ <h2>Guardar creación</h2>
+ <label>Nombre del código</label><input id="nombre" placeholder="Ej. Auto en la calle">
+ <label>Contraseña para verlo</label><input id="clave" type="password" placeholder="Pon aquí tu contraseña secreta">
+ <small style="color:#a999d6">Se guarda en la página con contraseña + en tu teléfono + se descarga el archivo.</small>
+ <div class="acciones" style="margin-top:12px"><button class="sec" onclick="cerrar('mGuardar')">Cancelar</button><button class="gd" onclick="guardar()">Guardar en todos lados</button></div>
+</div></div>
+<div class="modal" id="mLista"><div class="caja">
+ <h2>Mis creaciones</h2>
+ <div class="separador">🌐 En la página (todos, con contraseña)</div>
+ <div id="lista"></div>
+ <div class="separador">📱 Solo en mi teléfono (sin contraseña, solo yo)</div>
+ <div id="listaLocal"></div>
+ <div class="acciones" style="margin-top:12px"><button class="sec" onclick="cerrar('mLista')">Cerrar</button></div>
+</div></div>
+<div class="modal" id="mClave"><div class="caja">
+ <h2 id="claveTitulo">Abrir con contraseña</h2>
+ <label>Contraseña de este archivo</label><input id="claveAbrir" type="password" placeholder="Pide la contraseña al creador">
+ <p style="font-size:13px;color:#b8a8e6;margin:10px 0;">¿No tienes la contraseña?</p>
+ <a href="https://wa.me/TU_NUMERO?text=Hola%20Ramses%2C%20me%20puedes%20pasar%20la%20contrase%C3%B1a%20para%20ver%20tu%20creaci%C3%B3n%20en%20SKY%20WEEB%3F" target="_blank"><button class="wa" style="width:100%;padding:12px;">💬 Pedir contraseña por WhatsApp</button></a>
+ <div class="acciones" style="margin-top:12px"><button class="sec" onclick="cerrar('mClave')">Cancelar</button><button class="gd" onclick="abrirConClave()">Abrir</button></div>
+</div></div>
+<script>
+ const codigo=document.getElementById("codigo"), vista=document.getElementById("vista");
+ let usuario=null, abrirId=null;
+ function ejecutar(){vista.srcdoc=codigo.value}
+ function cerrar(id){document.getElementById(id).classList.remove("on")}
+ function insertar(t){const s=codigo.selectionStart;codigo.setRangeText(t,s,codigo.selectionEnd,"end");codigo.focus();ejecutar()}
+ function limpiar(){codigo.value="";ejecutar()}
+ function ejemplo(){codigo.value="<h1>Hola</h1>";ejecutar()}
+ function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+ function leerLocal(){try{return JSON.parse(localStorage.getItem("sw_lista")||"[]")}catch(e){return[]}}
+ function descargarLocal(nombre, codigoTexto){
+   const doc="<!DOCTYPE html><html><head><meta charset="+String.fromCharCode(34)+"UTF-8"+String.fromCharCode(34)+"><title>"+esc(nombre)+"</title></head><body>"+codigoTexto+"</body></html>";
+   const url=URL.createObjectURL(new Blob([doc],{type:"text/html"}));
+   const a=document.createElement("a");a.href=url;a.download=(nombre.replace(/[^a-z0-9 _-]/gi,"").replace(/ +/g,"_")||"creacion")+".html";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},2000);
+ }
+ function revisarRegistro(){
+   const guardado=localStorage.getItem("sw_usuario");
+   if(guardado){usuario=JSON.parse(guardado);document.getElementById("mRegistro").classList.remove("on");document.getElementById("yo").textContent="👤 "+usuario.nombre;}
+   else{document.getElementById("mRegistro").classList.add("on")}
+ }
+ async function registrar(){
+   const nombre=document.getElementById("regNombre").value.trim();
+   const telefono=document.getElementById("regTel").value.trim();
+   if(!nombre||!telefono){alert("Pon tu nombre y tu teléfono bro");return}
+   await fetch("/api/registro",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({nombre,telefono})});
+   usuario={nombre,telefono};localStorage.setItem("sw_usuario",JSON.stringify(usuario));
+   document.getElementById("mRegistro").classList.remove("on");
+   document.getElementById("yo").textContent="👤 "+nombre;
+ }
+ function abrirGuardar(){
+   if(!usuario){alert("Primero regístrate");return}
+   document.getElementById("nombre").value="";document.getElementById("clave").value="";
+   document.getElementById("mGuardar").classList.add("on");
+ }
+ async function guardar(){
+   const nombre=document.getElementById("nombre").value.trim()||"Sin nombre";
+   const clave=document.getElementById("clave").value.trim();
+   if(!clave){alert("Ponle una contraseña a tu archivo para protegerlo");return}
+   const r=await fetch("/api/guardar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({nombre,clave,codigo:codigo.value,autor:usuario.nombre,telefono:usuario.telefono})});
+   if(!r.ok){alert("Error al guardar en la página");return}
+   try{
+     const l=leerLocal();
+     l.unshift({id:Date.now(),nombre,autor:usuario.nombre,fecha:new Date().toLocaleString(),codigo:codigo.value});
+     localStorage.setItem("sw_lista",JSON.stringify(l));
+   }catch(e){}
+   descargarLocal(nombre, codigo.value);
+   alert("¡Guardado en todos lados! En la página + en tu teléfono + descargado.");
+   cerrar("mGuardar");
+ }
+ async function abrirLista(){
+   const r=await fetch("/api/creaciones");const l=await r.json();
+   const cont=document.getElementById("lista");cont.innerHTML="";
+   if(!l.length){cont.textContent="Aún no hay nada en la página."}
+   l.forEach(function(it){
+     const div=document.createElement("div");div.className="fila";
+     div.innerHTML="<div class='info'><b>"+it.nombre+" 🔒</b><small>"+it.autor+" - "+it.fecha+"</small></div>";
+     const b=document.createElement("button");b.textContent="Abrir 🔑";b.onclick=function(){abrirId=it.id;document.getElementById("claveTitulo").textContent="Abrir: "+it.nombre;document.getElementById("claveAbrir").value="";document.getElementById("mClave").classList.add("on")};
+     div.appendChild(b);cont.appendChild(div);
+   });
+   const contL=document.getElementById("listaLocal");contL.innerHTML="";
+   const ll=leerLocal();
+   if(!ll.length){contL.textContent="Tú no tienes nada guardado en este teléfono."}
+   ll.forEach(function(it){
+     const div=document.createElement("div");div.className="fila";
+     div.innerHTML="<div class='info'><b>"+it.nombre+"</b><small>"+it.autor+" - "+it.fecha+" - Solo en mi teléfono</small></div>";
+     const b1=document.createElement("button");b1.textContent="Abrir";b1.onclick=function(){codigo.value=it.codigo;ejecutar();cerrar("mLista")};
+     const b2=document.createElement("button");b2.textContent="⬇";b2.onclick=function(){descargarLocal(it.nombre,it.codigo)};
+     const b3=document.createElement("button");b3.textContent="🗑";b3.onclick=function(){localStorage.setItem("sw_lista",JSON.stringify(leerLocal().filter(function(x){return x.id!==it.id})));abrirLista()};
+     div.append(b1,b2,b3);contL.appendChild(div);
+   });
+   document.getElementById("mLista").classList.add("on");
+ }
+ async function abrirConClave(){
+   const clave=document.getElementById("claveAbrir").value.trim();
+   const r=await fetch("/api/abrir",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:abrirId,clave})});
+   if(!r.ok){alert("Contraseña incorrecta ❌");return}
+   const data=await r.json();codigo.value=data.codigo;ejecutar();cerrar("mClave");cerrar("mLista");
+ }
+ revisarRegistro();ejecutar();
+</script>
+</body>
+</html>
