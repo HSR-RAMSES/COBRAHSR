@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Galaxia de Flores Azules</title>
+<style>
+html,body{margin:0;height:100%;background:#00060d;overflow:hidden;font-family:system-ui,sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#hint{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;color:#9fdcff;font-size:13px;opacity:.75;pointer-events:none}
+#abrir{position:fixed;right:14px;top:calc(14px + env(safe-area-inset-top,0px));background:rgba(20,120,200,.35);color:#d8f3ff;border:1px solid #4cc3ff88;border-radius:20px;padding:8px 14px;font-size:14px;cursor:pointer;backdrop-filter:blur(4px)}
+#carta{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,10,25,.7);z-index:5}
+#carta.on{display:flex}
+.papel{position:relative;background:#fff;color:#2a2a2a;width:min(86vw,330px);max-height:80vh;overflow:auto;border-radius:10px;padding:30px 22px 20px;text-align:center;box-shadow:0 0 40px #2bb4ff99;animation:abre .45s ease}
+.papel h2{margin:0 0 12px;font:700 34px "Brush Script MT","Segoe Script",cursive;letter-spacing:2px}
+.papel p{margin:6px 0;font-size:15px;line-height:1.5;font-style:italic}
+.papel .f{margin-top:14px;font:22px "Brush Script MT","Segoe Script",cursive;color:#c0152f}
+.papel .h{position:absolute;color:#e0182d;font-size:30px;line-height:1}
+.papel button{margin-top:16px;background:#1478d4;color:#fff;border:0;border-radius:16px;padding:8px 22px;font-size:14px;cursor:pointer}
+@keyframes abre{from{transform:scale(.6) translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.papel{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<button id="abrir">Abrir carta 💌</button>
+<div id="hint">Toca una rosa azul</div>
+<div id="carta"><div class="papel" id="papel"></div></div>
+
+<script>
+/* ====== PERSONALIZA AQUÍ ====== */
+const CFG = {
+  centro: 'Te amo 💙',
+  titulo: 'Amor',
+  frases: ['Te adoro 💙','Mi amor','Me encantas','Eres mi todo','Eres preciosa','Me completas','Te amo'],
+  carta: ['Eres la luz de mis días,','la calma en mis noches','y el latido de mi corazón.','Gracias por existir.','Te amo mucho 💙'],
+  firma: 'Con todo mi amor'
+};
+/* ================================ */
+
+const cv = document.getElementById('c'), g = cv.getContext('2d');
+const calm = matchMedia('(prefers-reduced-motion:reduce)').matches ? .3 : 1;
+let W, H, D, cx, gy, hy, hs, R;
+
+function resize(){
+  D = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * D; cv.height = H * D;
+  g.setTransform(D, 0, 0, D, 0, 0);
+  cx = W / 2; gy = H * .76;
+  hs = Math.min(W * .5, H * .3) / 32;
+  hy = gy - 24 - 17 * hs;
+  R = Math.min(W * .46, 330);
+}
+resize(); addEventListener('resize', resize);
+
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+/* estrellas */
+const stars = Array.from({length: 220}, () => ({x: Math.random(), y: Math.random(), r: rnd(.4, 1.4), p: rnd(0, 6.28), s: rnd(.5, 2)}));
+
+/* galaxia espiral */
+const gal = Array.from({length: 2200}, (_, i) => {
+  const r = Math.pow(Math.random(), .65);
+  return {r, a: (i % 3) * 2.094 + r * 5.2 + rnd(-.5, .5) * (.9 - r * .5), h: rnd(185, 210), l: rnd(60, 92), z: rnd(.8, 2)};
+});
+
+/* corazón de partículas */
+const heart = Array.from({length: 750}, () => {
+  const t = Math.random() * 6.283, j = rnd(-.9, .9);
+  return {
+    x: 16 * Math.pow(Math.sin(t), 3) + j,
+    y: -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) + rnd(-.9, .9),
+    p: rnd(0, 6.28), z: rnd(.8, 1.8)
+  };
+});
+
+/* rosas azules (se dibujan una vez en un canvas pequeño) */
+function rosa(c1, c2){
+  const S = 120, k = document.createElement('canvas'); k.width = k.height = S;
+  const x = k.getContext('2d'); x.translate(S / 2, S / 2);
+  const glow = x.createRadialGradient(0, 0, 5, 0, 0, S / 2);
+  glow.addColorStop(0, 'rgba(80,190,255,.35)'); glow.addColorStop(1, 'rgba(80,190,255,0)');
+  x.fillStyle = glow; x.fillRect(-S / 2, -S / 2, S, S);
+  for (let l = 0; l < 4; l++){
+    const r = S * .4 * (1 - l * .21), n = 6 - l;
+    for (let i = 0; i < n; i++){
+      x.save(); x.rotate(i / n * 6.283 + l * .7); x.translate(r * .5, 0);
+      const gr = x.createRadialGradient(-r * .2, 0, 1, 0, 0, r * .7);
+      gr.addColorStop(0, c2); gr.addColorStop(1, c1);
+      x.fillStyle = gr; x.strokeStyle = 'rgba(0,20,70,.55)'; x.lineWidth = 1.2;
+      x.beginPath(); x.ellipse(0, 0, r * .56, r * .48, 0, 0, 6.283); x.fill(); x.stroke();
+      x.restore();
+    }
+  }
+  x.strokeStyle = 'rgba(0,30,90,.7)'; x.lineWidth = 1.3; x.beginPath();
+  for (let a = 0; a < 11; a += .2){ const r = a * 1.6; x.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+  x.stroke();
+  return k;
+}
+const sprites = [rosa('#1d62d6', '#5fb8ff'), rosa('#2a7de8', '#9fdcff'), rosa('#0f3fa8', '#3d95f0')];
+const rosas = Array.from({length: 9}, (_, i) => ({
+  spr: sprites[i % 3], x0: rnd(.08, .92), p: Math.random(), v: rnd(.00028, .0005),
+  ph: rnd(0, 6.28), sz: rnd(50, 95), rot: rnd(0, 6.28), sx: -999, sy: -999, ss: 0
+}));
+
+/* dibujo */
+function frame(ms){
+  const t = ms / 1000 * calm;
+  g.fillStyle = '#00060d'; g.fillRect(0, 0, W, H);
+
+  let b = g.createRadialGradient(cx, gy, 0, cx, gy, H * .85);
+  b.addColorStop(0, 'rgba(0,160,210,.5)'); b.addColorStop(.45, 'rgba(0,70,130,.22)'); b.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = b; g.fillRect(0, 0, W, H);
+
+  for (const s of stars){
+    g.globalAlpha = .35 + .65 * Math.abs(Math.sin(t * s.s + s.p));
+    g.fillStyle = '#dff6ff';
+    g.beginPath(); g.arc(s.x * W, s.y * H, s.r, 0, 6.283); g.fill();
+  }
+  g.globalAlpha = 1;
+
+  /* haz de luz */
+  const tip = hy + 17 * hs;
+  b = g.createLinearGradient(0, gy, 0, tip);
+  b.addColorStop(0, 'rgba(140,230,255,.55)'); b.addColorStop(1, 'rgba(140,230,255,0)');
+  g.fillStyle = b; g.fillRect(cx - 6, tip, 12, gy - tip);
+
+  /* galaxia */
+  const rot = t * .18;
+  for (const p of gal){
+    const r = p.r * R, a = p.a + rot;
+    g.fillStyle = `hsl(${p.h},100%,${p.l}%)`;
+    g.globalAlpha = .85 - p.r * .45;
+    g.fillRect(cx + Math.cos(a) * r, gy + Math.sin(a) * r * .26, p.z, p.z);
+  }
+  g.globalAlpha = 1;
+  b = g.createRadialGradient(cx, gy, 0, cx, gy, 50);
+  b.addColorStop(0, 'rgba(255,255,255,.95)'); b.addColorStop(.3, 'rgba(150,230,255,.6)'); b.addColorStop(1, 'rgba(0,150,255,0)');
+  g.fillStyle = b; g.fillRect(cx - 50, gy - 50, 100, 100);
+
+  /* corazón */
+  const pulse = 1 + .045 * Math.sin(t * 2.4);
+  for (const p of heart){
+    const f = .5 + .5 * Math.sin(t * 2 + p.p);
+    g.globalAlpha = .35 + .65 * f;
+    g.fillStyle = f > .8 ? '#ffffff' : '#7fe3ff';
+    g.fillRect(cx + p.x * hs * pulse + Math.sin(t + p.p) * .8, hy + p.y * hs * pulse, p.z, p.z);
+  }
+  g.globalAlpha = 1;
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = `700 ${Math.max(hs * 2.6, 22)}px "Brush Script MT","Segoe Script",cursive`;
+  g.shadowColor = '#3cc8ff'; g.shadowBlur = 14; g.fillStyle = '#eaffff';
+  g.fillText(CFG.centro, cx, hy + hs);
+  g.shadowBlur = 0;
+
+  /* frases en órbita */
+  const n = CFG.frases.length, fs = W < 500 ? 12 : 16;
+  for (let i = 0; i < n; i++){
+    const a = i / n * 6.283 + t * .25, d = (Math.sin(a) + 1) / 2;
+    g.globalAlpha = .3 + .7 * d;
+    g.font = `600 ${fs * (.75 + .4 * d)}px system-ui,sans-serif`;
+    g.shadowColor = '#3cc8ff'; g.shadowBlur = 8; g.fillStyle = '#ffffff';
+    g.fillText(CFG.frases[i], cx + Math.cos(a) * R * .85, gy + Math.sin(a) * R * .24 - 6);
+  }
+  g.shadowBlur = 0; g.globalAlpha = 1;
+
+  /* rosas que suben desde la galaxia */
+  for (const r of rosas){
+    r.p += r.v * 16 * calm; if (r.p > 1){ r.p = 0; r.x0 = rnd(.08, .92); }
+    const s = r.sz * (.55 + .45 * r.p);
+    r.sx = r.x0 * W + Math.sin(t * .8 + r.ph) * 28;
+    r.sy = gy - r.p * (gy + 60); r.ss = s;
+    g.globalAlpha = Math.min(1, r.p * 8, (1 - r.p) * 4);
+    g.save(); g.translate(r.sx, r.sy); g.rotate(r.rot + t * .25);
+    g.drawImage(r.spr, -s / 2, -s / 2, s, s); g.restore();
+  }
+  g.globalAlpha = 1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* carta */
+const carta = document.getElementById('carta'), papel = document.getElementById('papel');
+papel.innerHTML = '<span class="h" style="left:12px;top:8px">♥</span><span class="h" style="right:12px;top:8px">♥</span>' +
+  `<h2>${CFG.titulo}</h2>` + CFG.carta.map(l => `<p>${l}</p>`).join('') +
+  `<div class="f">${CFG.firma}</div><button id="cerrar">Cerrar</button>`;
+const abrir = () => carta.classList.add('on'), cerrar = () => carta.classList.remove('on');
+document.getElementById('abrir').onclick = abrir;
+document.getElementById('cerrar').onclick = cerrar;
+carta.onclick = e => { if (e.target === carta) cerrar(); };
+addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+
+cv.addEventListener('pointerdown', e => {
+  for (const r of rosas){
+    if (Math.hypot(e.clientX - r.sx, e.clientY - r.sy) < Math.max(r.ss * .6, 28)){ abrir(); return; }
+  }
+});
+</script>
+</body>
+</html>
